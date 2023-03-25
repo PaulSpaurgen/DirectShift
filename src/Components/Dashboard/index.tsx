@@ -4,7 +4,14 @@ import logo from "../../Assets/logo.webp";
 import { Octokit } from "octokit";
 import CommonView from "./CommonView";
 
-const init_pullRequest_filters = {
+// Common type check for filters
+interface filters_TypeCheck {
+  perPage: number,
+  page: number,
+  state: string,
+  sort: string,
+}
+const init_pullRequest_filters: filters_TypeCheck = {
   perPage: 20,
   page: 1,
   state: "all",
@@ -12,15 +19,21 @@ const init_pullRequest_filters = {
 }
 
 function Dashboard() {
-  // Usestate starts for pullrequest data intrepration
+  // Usestates for pullrequest data intrepration
   const [pullRequestFilters, setPullRequestFilters] = useState<any>(init_pullRequest_filters)
   const [isLoadingPull, setisLoadingPull] = useState(false)
   const [pullRequestData, setPullRequestData] = useState<any>([])
 
-   // Usestate starts for issues data intrepration
-  const [isLoadingIssues, setisLoadingIssues] = useState(true)
+  // Usestates for issues data intrepration
+  const [isLoadingIssues, setisLoadingIssues] = useState(false)
 
- 
+
+  // useState for organization data.
+  const [organizationData, setOrganizationData] = useState({})
+
+
+
+
   const fetchPullData = async () => {
     setisLoadingPull(true)
     const octokit = new Octokit()
@@ -36,6 +49,12 @@ function Dashboard() {
         console.log(response?.data)
         setPullRequestData(response?.data || [])
         setisLoadingPull(false)
+        setOrganizationData({
+          name: response?.data[0]?.base?.user?.login || "Not found",
+          avatar: response?.data[0]?.base?.user?.avatar_url || "Not found",
+          url: "https://github.com/public-apis/public-apis",
+          type: response?.data[0]?.base?.user?.type || "Not found",
+        })
       })
   }
   // const fetchIssuesData  =async () => {
@@ -77,23 +96,29 @@ function Dashboard() {
 
       {/* rest-page */}
       <Box display="flex" height="92vh" width="100%">
+        {/* left-side section (Pull requests) */}
         <Box width="50%" height="100%" sx={{
           border: "0px",
-          borderRight: "0.5px",
+          borderRight: "1px",
           borderRightColor: "lightgray",
-          borderStyle: "solid"
+          borderStyle: "dashed"
         }}>
           <CommonView
             heading="Pull Requests"
-            isLoading = {isLoadingPull}
+            isLoading={isLoadingPull}
             data={pullRequestData}
-           />
+            orgData={organizationData}
+          />
         </Box>
-        <Box  width="50%" height="100%">
+
+        {/* right-side (issues) */}
+        <Box width="50%" height="100%">
           <CommonView
             heading="Issues"
-            isLoading = {isLoadingIssues}
-           />
+            isLoading={isLoadingIssues}
+            orgData={organizationData}
+
+          />
         </Box>
 
       </Box>
