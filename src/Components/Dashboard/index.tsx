@@ -96,6 +96,11 @@ function Dashboard() {
   useEffect(() => {
     fetchPullData();
   }, [pullRequestFilters]);
+  
+  const resetFilters = () =>{
+    setPullRequestFilters(init_pullRequest_filters)
+    setIssuesFilters(init_issuesRequest_filters)
+  }
 
   return (
     <Box>
@@ -110,6 +115,7 @@ function Dashboard() {
           dataType === "pull" ? setPullRequestFilters : setIssuesFilters
         }
         isLoading={dataType === "pull" ? isLoadingPull : isLoadingIssues}
+        reset={resetFilters}
       />
       {/* Nav bar */}
       <Box
