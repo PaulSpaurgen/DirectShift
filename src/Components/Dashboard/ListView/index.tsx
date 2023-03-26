@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Typography from "@mui/material/Typography";
 import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
@@ -25,6 +25,9 @@ import Chip from "@mui/material/Chip";
 import moment from "moment";
 import CircularProgress from "@mui/material/CircularProgress";
 import Modal from "@mui/material/Modal";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import TextField from "@mui/material/TextField";
+import Stack from "@mui/material/Stack";
 
 const style = {
   position: "absolute" as "absolute",
@@ -40,6 +43,22 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+const inputModalStyles = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 300,
+  dislay: "flex",
+  flexDirection: "column",
+  height: 60,
+  color: "black",
+  bgcolor: "white",
+  border: "1px solid lightgray",
+  borderRadius: "15px",
+  boxShadow: 24,
+  p: 4,
+};
 
 const rowsPerPage = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 export default function ListView({
@@ -50,15 +69,20 @@ export default function ListView({
   filters,
   setFilters,
   isLoading,
+  reset,
 }: any) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const [msgType, setMsgType] = useState("");
+
+  const [modalOpen, setModalOpen] = useState(false);
   const [comments, setComments] = useState<any>([]);
   const [msgAdmin, setMsgByAdmin] = useState<any>([]);
   const [commits, setCommits] = useState<any>([]);
   const [isLoadingComments, setCommentsIsLoading] = useState(false);
+  const [labels, setLabels] = useState([]);
+  const [inputLabel, setInputLable] = useState("");
+
   const handleChange = (key: any, value: any) => {
     setFilters((prev: any) => ({
       ...prev,
@@ -67,7 +91,6 @@ export default function ListView({
   };
 
   const fetchComments = (url: any) => {
-    setMsgType("Comments");
     handleOpen();
     setCommentsIsLoading(true);
     fetch(url)
@@ -88,6 +111,14 @@ export default function ListView({
         setCommits(data);
       });
   };
+
+  const handleDelete = (index: any) => {
+    let tempData = JSON.parse(JSON.stringify(labels));
+    tempData = tempData.splice(1, index)
+    console.log(tempData)
+    handleChange("sort", tempData.toString());
+    setLabels(tempData);
+  };
   return (
     <Drawer
       anchor="left"
@@ -95,6 +126,45 @@ export default function ListView({
       elevation={16}
       transitionDuration={1000}
     >
+      <Modal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+        }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={inputModalStyles}>
+          <TextField
+            id="filled-basic"
+            label="Label"
+            variant="filled"
+            size="small"
+            value={inputLabel}
+            onChange={(e: any) => {
+              e.preventDefault();
+              setInputLable(e.target.value);
+            }}
+          />
+          <Button
+            variant="contained"
+            sx={{
+              marginLeft: "10px",
+            }}
+            onClick={() => {
+              setModalOpen(false);
+              let tempData = JSON.parse(JSON.stringify(labels));
+              tempData.push(inputLabel);
+              setLabels(tempData);
+              setInputLable("");
+              handleChange("sort", tempData.toString());
+            }}
+          >
+            {" "}
+            Add Label{" "}
+          </Button>
+        </Box>
+      </Modal>
       <Box
         width="100vw"
         position="relative"
@@ -207,7 +277,7 @@ export default function ListView({
             <Box
               display="flex"
               alignItems="center"
-              width="80vh"
+              //   width="80vh"
               justifyContent="flex-start"
             >
               <Typography variant="caption">{"Filter by status"}</Typography>
@@ -276,8 +346,66 @@ export default function ListView({
                   </Button>
                 </Box>
               ) : (
-                <Box></Box>
+                <Box display="flex">
+                  <Button
+                    variant="contained"
+                    sx={{
+                      mr: "4px",
+                      ml: "16px",
+                      height: "26px",
+                    }}
+                    onClick={() => {
+                      setModalOpen(true);
+                    }}
+                  >
+                    Add Lables
+                    <AddCircleIcon
+                      sx={{
+                        fontSize: "16px",
+                        ml: "5px",
+                        mb: "2px",
+                        alignItems: "center",
+                      }}
+                    />{" "}
+                  </Button>
+
+                  <Stack
+                    direction="row"
+                    ml="16px"
+                    spacing={2}
+                    sx={{
+                      zIndex: "10",
+                    }}
+                  >
+                    {labels.map((val: any, index: any) => (
+                      <Chip
+                        label={`${val}`}
+                        key={`${index}`}
+                        variant="filled"
+                        size="small"
+                        sx={{
+                          backgroundColor: "lightgray",
+                          padding: "0px",
+                        }}
+                        onDelete={() => handleDelete(index)}
+                      />
+                    ))}
+                  </Stack>
+                </Box>
               )}
+              <Button
+                variant="contained"
+                sx={{
+                  ml: "60px",
+                }}
+                onClick={() => {
+                  reset();
+                  setLabels([])
+                }}
+              >
+                {" "}
+                Reset
+              </Button>{" "}
             </Box>{" "}
           </Box>
         </Box>
@@ -286,7 +414,7 @@ export default function ListView({
             <TableContainer
               component={Paper}
               sx={{
-                height: "70vh",
+                height: "60vh",
               }}
             >
               <Table aria-label="simple table">
@@ -322,7 +450,6 @@ export default function ListView({
                           },
                         }}
                         onClick={() => {
-                          setMsgType("Additional Data");
                           setMsgByAdmin(val?.body);
                           handleOpen();
                           fetchComments(val?.comments_url);

@@ -28,7 +28,7 @@ function CommonView({ heading, isLoading, data, orgData,drawerController,setType
           <CircularProgress size={25} thickness={6} />
         </Box>
       ) : (
-        <Box padding="50px">
+        <Box padding="30px">
           <Typography variant="h6" fontWeight="bold" marginBottom="18px">
             {heading}
           </Typography>

@@ -12,8 +12,6 @@ const theme = createTheme({
           fontSize: "12px",
           fontWeight: "500",
           textTransform: "none",
-          color: "#292929 !important",
-          bgcolor: "white !important",
           borderColor: "#292929 !important",
           ":hover": {
             color: "#292929",

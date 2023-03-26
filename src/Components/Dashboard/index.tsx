@@ -82,6 +82,7 @@ function Dashboard() {
         state: issuesFilters.state,
         per_page: issuesFilters.perPage,
         page: issuesFilters.page,
+        labels: issuesFilters.sort,
       })
       .then((response) => {
         let tempData = response?.data || [];
@@ -96,7 +97,7 @@ function Dashboard() {
   useEffect(() => {
     fetchPullData();
   }, [pullRequestFilters]);
-  
+
   const resetFilters = () =>{
     setPullRequestFilters(init_pullRequest_filters)
     setIssuesFilters(init_issuesRequest_filters)
@@ -129,8 +130,8 @@ function Dashboard() {
         <img
           src={logo}
           style={{
-            width: "50px",
-            height: "50px",
+            width: "40px",
+            height: "40px",
             borderRadius: "5px",
             marginLeft: "60px",
             marginRight: "10px",
