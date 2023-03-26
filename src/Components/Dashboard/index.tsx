@@ -16,7 +16,7 @@ const init_pullRequest_filters: filters_TypeCheck = {
   perPage: 10,
   page: 1,
   state: "all",
-  sort: "",
+  sort: "dsc",
 };
 
 const init_issuesRequest_filters: filters_TypeCheck = {
@@ -36,16 +36,17 @@ function Dashboard() {
 
   // Usestates for issues data intrepration
   const [isLoadingIssues, setisLoadingIssues] = useState(false);
-  const [issuesFilters, setIssuesFilter] = useState(init_issuesRequest_filters);
-  const [intiIssuesData, setintiIssuesData] = useState<any>([]);
+  const [issuesFilters, setIssuesFilters] = useState(
+    init_issuesRequest_filters
+  );
   const [issuesFilteredData, setIssuesFilteredData] = useState<any>([]);
 
   // useState for organization data.
   const [organizationData, setOrganizationData] = useState({});
 
-  // useState to control listview 
-  const [isDrawerOpen,setIsDrawerOpen] = useState(false)
-  const [dataType,setDataType] = useState("")
+  // useState to control listview
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [dataType, setDataType] = useState("");
 
   const fetchPullData = async () => {
     setisLoadingPull(true);
@@ -54,10 +55,11 @@ function Dashboard() {
       .request("GET /repos/public-apis/public-apis/pulls", {
         owner: "public-apis",
         repo: "public-apis",
+        sort: "popularity",
         state: pullRequestFilters.state,
-        sort: pullRequestFilters.sort,
         per_page: pullRequestFilters.perPage,
         page: pullRequestFilters.page,
+        direction: pullRequestFilters.sort,
       })
       .then((response) => {
         setPullRequestData(response?.data || []);
@@ -77,34 +79,38 @@ function Dashboard() {
       .request("GET /repos/public-apis/public-apis/issues", {
         owner: "public-apis",
         repo: "public-apis",
-        state: "all",
-        per_page: 100,
+        state: issuesFilters.state,
+        per_page: issuesFilters.perPage,
+        page: issuesFilters.page,
       })
       .then((response) => {
         let tempData = response?.data || [];
-        tempData = tempData.filter((val: any) => {
-          if (!val.pull_request) {
-            return val;
-          }
-        });
-        console.log(tempData);
         setisLoadingIssues(false);
-        setintiIssuesData(tempData);
-        setIssuesFilteredData(tempData.slice(0, 10));
+        setIssuesFilteredData(tempData);
       });
   };
   useEffect(() => {
-    fetchPullData();
     fetchIssuesData();
-  }, []);
+  }, [issuesFilters]);
+
+  useEffect(() => {
+    fetchPullData();
+  }, [pullRequestFilters]);
+
   return (
     <Box>
       {/* list view drawer component */}
-          <ListView isDrawerOpen={isDrawerOpen} setIsDrawerOpen={setIsDrawerOpen} type={dataType}  
-          data={
-            dataType === "pull" ? pullRequestData : issuesFilteredData
-          }
-            />
+      <ListView
+        isDrawerOpen={isDrawerOpen}
+        setIsDrawerOpen={setIsDrawerOpen}
+        type={dataType}
+        data={dataType === "pull" ? pullRequestData : issuesFilteredData}
+        filters={dataType === "pull" ? pullRequestFilters : issuesFilters}
+        setFilters={
+          dataType === "pull" ? setPullRequestFilters : setIssuesFilters
+        }
+        isLoading={dataType === "pull" ? isLoadingPull : isLoadingIssues}
+      />
       {/* Nav bar */}
       <Box
         height="8vh"
@@ -162,8 +168,6 @@ function Dashboard() {
             data={issuesFilteredData}
             drawerController={setIsDrawerOpen}
             setType={setDataType}
-
-
           />
         </Box>
       </Box>
