@@ -2,3 +2,13 @@ html , body{
     padding: 0;
     margin: 0;
 }
+.MuiOutlinedInput-notchedOutline {
+    border-width: 1px !important;
+    border-color: white !important;
+    color: white;
+  }
+  
+.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: white !important;
+    color: white;
+  }

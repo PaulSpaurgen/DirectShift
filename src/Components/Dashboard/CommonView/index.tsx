@@ -5,8 +5,10 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Link from "@mui/material/Link";
 import Chip from "@mui/material/Chip";
+import moment from "moment";
+import Button from "@mui/material/Button";
 
-function CommonView({ heading, isLoading, data, orgData }: any) {
+function CommonView({ heading, isLoading, data, orgData,drawerController,setType }: any) {
   return (
     <Box
       sx={{
@@ -33,6 +35,7 @@ function CommonView({ heading, isLoading, data, orgData }: any) {
           <Box
             display="flex"
             alignItems="center"
+            justifyContent="space-between"
             padding="16px"
             sx={{
               border: "0px",
@@ -41,37 +44,66 @@ function CommonView({ heading, isLoading, data, orgData }: any) {
               borderStyle: "solid",
             }}
           >
-            <Avatar
-              alt="logo"
-              src={orgData?.avatar}
-              sx={{ width: 60, height: 60 }}
-            />
-            <Box marginLeft="10px">
-              <Typography fontSize="14px" fontWeight="bold">
-                {orgData?.name}
-              </Typography>
-              <Typography fontSize="12px" fontWeight="bold">
-                {orgData?.type}
-              </Typography>
-              <Link
-                onClick={() => {
-                  window.open(orgData?.url, "_blank");
-                }}
-                variant="caption"
-                underline="hover"
-                sx={{
-                  cursor: "pointer",
-                }}
-              >
-                {"View repository"}
-              </Link>
+            <Box display="flex">
+              <Avatar
+                alt="logo"
+                src={orgData?.avatar}
+                sx={{ width: 60, height: 60 }}
+              />
+              <Box marginLeft="10px">
+                <Typography fontSize="14px" fontWeight="bold">
+                  {orgData?.name}
+                </Typography>
+                <Typography fontSize="12px" fontWeight="bold">
+                  {orgData?.type}
+                </Typography>
+                <Link
+                  onClick={() => {
+                    window.open(orgData?.url, "_blank");
+                  }}
+                  variant="caption"
+                  underline="hover"
+                  sx={{
+                    cursor: "pointer",
+                  }}
+                >
+                  {"View repository"}
+                </Link>
+              </Box>
             </Box>
+            <Button
+              sx={{
+                marginRight: "20px",
+                backgroundColor: "#292929",
+                color:"white", 
+                padding:"5px 15px ",
+                textTransform:"none",
+                ":hover":{
+                  color:"#292929",
+                  bgcolor:"white",
+                  borderColor:"#292929",
+                }
+                
+                
+              }}
+              size="small"
+              variant="outlined"
+              
+              onClick={()=>{
+                drawerController(true)
+                setType(heading === "Pull Requests"
+                ? "pull"
+                : "issue")
+              }}
+            >
+              List View
+            </Button>
           </Box>
 
           <Box
             sx={{
               height: "60vh",
-              bgcolor: "#f5f5f5",
+              bgcolor: "#edf9fc",
               overflowX: "auto",
               width: "100%",
               marginTop: "20px",
@@ -127,9 +159,7 @@ function CommonView({ heading, isLoading, data, orgData }: any) {
                         <Chip
                           label={val?.state}
                           size="small"
-                          color={
-                            val?.state === "open" ? "success" : "secondary"
-                          }
+                          color={val?.state === "open" ? "success" : "info"}
                           variant="outlined"
                           sx={{
                             marginLeft: "10px",
@@ -137,9 +167,11 @@ function CommonView({ heading, isLoading, data, orgData }: any) {
                         />
                       </Typography>
                       <Typography variant="caption" color="gray">
-                        Last updated on {`${new Date(val?.update_at)}`}
+                        Last updated on{" "}
+                        {`${moment(val?.updated_at).format("LLL")}`}
                       </Typography>
-                      <div>
+
+                      <Box>
                         <Link
                           onClick={() => {
                             window.open(val?.html_url, "_blank");
@@ -150,9 +182,11 @@ function CommonView({ heading, isLoading, data, orgData }: any) {
                             cursor: "pointer",
                           }}
                         >
-                          {"View pull request"}
+                          {heading === "Pull Requests"
+                            ? "View pull request"
+                            : "View issue"}
                         </Link>
-                      </div>
+                      </Box>
                     </Box>
                   </Box>
                 ))}
